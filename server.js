@@ -1,6 +1,6 @@
 const express = require("express");
 const app = express();
-const port = 3000;
+const port = 3001;
 var morgan = require("morgan");
 const bodyParser = require("body-parser");
 const AccountModel = require("./models/account");
