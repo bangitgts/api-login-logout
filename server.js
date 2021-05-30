@@ -4,8 +4,8 @@ const port = 3000;
 var morgan = require("morgan");
 const bodyParser = require("body-parser");
 const AccountModel = require("./models/account");
-var jwt = require('jsonwebtoken');
-var cookieParser = require('cookie-parser');
+var jwt = require("jsonwebtoken");
+var cookieParser = require("cookie-parser");
 const checkToken = require("./auth/checkToken");
 app.use(cookieParser());
 // parse application/x-www-form-urlencoded
@@ -14,9 +14,13 @@ app.use(bodyParser.urlencoded({ extended: false }));
 // parse application/json
 app.use(bodyParser.json());
 
-app.get("/",checkToken, (req, res, next) => {
-  res.json("Đăng nhập thành công");
-  res.json(req.username);
+app.get("/", checkToken, (req, res, next) => {
+  let checknew = {
+    username: req.body.username,
+    password: req.body.password
+  }
+  res.json(checknew);
+
 });
 
 app.post("/register", (req, res, next) => {
@@ -45,13 +49,16 @@ app.post("/login", (req, res, next) => {
   })
     .then((data) => {
       if (data) {
-        let token = jwt.sign({
-          _id: data._id
-        },'password')
-        res.header("auth-token", token).send(token)
+        let token = jwt.sign(
+          {
+            _id: data._id,
+          },
+          "password"
+        );
+        res.header("auth-token", token).send(token);
         res.json({
-          message: 'Logged  successfully',
-          token: token
+          message: "Logged  successfully",
+          token: token,
         });
       } else {
         return res.json("Tai khoan hoac mat khau sai");
