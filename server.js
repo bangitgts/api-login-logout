@@ -15,11 +15,19 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
 app.get("/", checkToken, (req, res, next) => {
-  let checknew = {
-    username: req.body.username,
+  AccountModel.findOne({ username: req.body.username,
     password: req.body.password
-  }
-  res.json(checknew);
+  })
+  .then((data) => {
+    res.json(data)
+  })
+  .catch(err=>console.log(err))
+  // let checknew = {
+  //   username: req.body.username,
+  //   password: req.body.password,
+  //   haihang: "abc"
+  // }
+  // res.json(checknew);
 
 });
 

@@ -6,7 +6,8 @@ mongoose.connect('mongodb://localhost/CDTT', {
 const Schema = mongoose.Schema;
 const AccountSchema = new Schema({
     username: String,
-    password: String
+    password: String,
+    haihang: String
 },{
     collection: 'account'
 });
