@@ -1,0 +1,25 @@
+{
+  "name": "api-login-logout-cdtt",
+  "version": "1.0.0",
+  "description": "api cho shop ",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bangitgts/api-login-logout.git"
+  },
+  "keywords": [
+    "bang"
+  ],
+  "author": "Bang",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/bangitgts/api-login-logout/issues"
+  },
+  "homepage": "https://github.com/bangitgts/api-login-logout#readme",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
+}
