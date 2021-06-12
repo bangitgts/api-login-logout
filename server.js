@@ -1,12 +1,15 @@
 const express = require("express");
 const app = express();
-const port = 5000;
+const port = 4000;
 var morgan = require("morgan");
 const bodyParser = require("body-parser");
 const AccountModel = require("./models/account");
 var jwt = require("jsonwebtoken");
 var cookieParser = require("cookie-parser");
 const checkToken = require("./auth/checkToken");
+var cors = require('cors');
+//use cors
+app.use(cors())
 app.use(cookieParser());
 // parse application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -14,37 +17,58 @@ app.use(bodyParser.urlencoded({ extended: false }));
 // parse application/json
 app.use(bodyParser.json());
 
-app.get("/user", checkToken, (req, res, next) => {
+app.get("/account", checkToken, (req, res, next) => {
+
     AccountModel.findOne({
             username: req.body.username,
-            password: req.body.password
+            password: req.body.password,
         })
         .then((data) => {
-            res.json(data)
+            res.json({
+                status: 200,
+                success: true,
+                data: {
+                    _id: data._id,
+                    username: data.username
+                },
+                message: "Đăng nhập thành công"
+            });
         })
-        .catch(err => console.log(err))
+        .catch((err) => console.log(err));
 });
 
-app.post("/user/register", (req, res, next) => {
+app.post("/account/register", (req, res, next) => {
     var username = req.body.username;
     var password = req.body.password;
     AccountModel.findOne({ username: username })
         .then((data) => {
             if (data) {
-                res.json("User này đã tồn tại");
+                return res.status(400).json({
+                    message: "Account created failed. Account has been duplicated",
+                    status: 400,
+                    success: false
+                });
             } else {
                 AccountModel.create({
                     username: username,
                     password: password,
+                    cart: []
                 });
             }
         })
-        .then((data) => res.json("Tạo Tài Khoản Thành Công"))
-        .catch((err) => res.status(500).json("Thất bại "));
+        .then((data) => {
+            return res.status(200).json({
+                message: "Account created successfully",
+                status: 200,
+                success: true
+            })
+        })
+        .catch((err) => res.status(500).json("Server 500"));
 });
-app.post("/user/login", (req, res, next) => {
+app.post("/account/login", (req, res, next) => {
     let username = req.body.username;
     let password = req.body.password;
+
     AccountModel.findOne({
             username: username,
             password: password,
@@ -57,19 +81,22 @@ app.post("/user/login", (req, res, next) => {
                     "password"
                 );
                 res.header("auth-token", token);
-                //                res.header("auth-token", token).send(token);
 
-                res.json({
-                    message: "Logggin successfully",
-                    username: username,
-                    password: password,
-                    status: true,
-                    token: token
+                res.status(200).json({
+                    message: "Loggin successfully",
+                    data: {
+                        username: username,
+                        password: password,
+                        token: token
+                    },
+                    success: true,
+                    status: 200,
                 });
             } else {
-                return res.json({
-                    message: "Logggin failed.Account or password does not match",
-                    status: false,
+                return res.status(400).json({
+                    message: "Loggin failed. Account or password does not match",
+                    success: false,
+                    status: 400,
                 });
             }
         })
