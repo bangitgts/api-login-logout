@@ -7,6 +7,8 @@
     <title>Document</title>
 </head>
 <body>
-    User:<input type="text">
+    <?php
+echo "My first PHP script!";
+?>
 </body>
 </html>
