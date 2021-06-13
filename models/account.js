@@ -5,9 +5,14 @@ mongoose.connect('mongodb://localhost/CDTT', {
 });
 const Schema = mongoose.Schema;
 const AccountSchema = new Schema({
-    username: String,
+    name: String,
+    email: String,
     password: String,
-    cart: []
+    address: String,
+    phoneNumber: String,
+    dateBirth: String,
+    sex: Number,
+    introduce: String
 }, {
     collection: 'account'
 });

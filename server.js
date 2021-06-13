@@ -7,9 +7,9 @@ const AccountModel = require("./models/account");
 var jwt = require("jsonwebtoken");
 var cookieParser = require("cookie-parser");
 const checkToken = require("./auth/checkToken");
-var cors = require('cors');
+var cors = require("cors");
 //use cors
-app.use(cors())
+app.use(cors());
 app.use(cookieParser());
 // parse application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -18,59 +18,79 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
 app.get("/account", checkToken, (req, res, next) => {
-
     AccountModel.findOne({
-            username: req.body.username,
+            email: req.body.email,
             password: req.body.password,
         })
         .then((data) => {
-            res.json({
+            res.status(200).json({
                 status: 200,
                 success: true,
                 data: {
                     _id: data._id,
-                    username: data.username
+                    email: data.email,
+                    address: data.address,
+                    phoneNumber: data.phoneNumber,
+                    dateBirth: data.dateBirth,
+                    sex: data.sex,
+                    introduce: data.introduce,
                 },
-                message: "Đăng nhập thành công"
+                message: "Đăng nhập thành công",
             });
         })
-        .catch((err) => console.log(err));
+        .catch((err) => {
+            res.status(400).json({
+                status: 400,
+                success: false,
+                message: "Đăng nhập không thành công",
+            });
+        });
 });
 
 app.post("/account/register", (req, res, next) => {
-    var username = req.body.username;
+    var name = req.body.name;
+    var email = req.body.email;
     var password = req.body.password;
-    AccountModel.findOne({ username: username })
+    AccountModel.findOne({ email: email })
         .then((data) => {
             if (data) {
                 return res.status(400).json({
                     message: "Account created failed. Account has been duplicated",
                     status: 400,
-                    success: false
+                    success: false,
                 });
             } else {
                 AccountModel.create({
-                    username: username,
+                    name: name,
+                    email: email,
                     password: password,
-                    cart: []
+                    address: "",
+                    phoneNumber: "",
+                    dateBirth: "",
+                    sex: null,
+                    introduce: "",
                 });
             }
         })
         .then((data) => {
             return res.status(200).json({
                 message: "Account created successfully",
+                data: {
+                    name: name,
+                    email: email,
+                },
                 status: 200,
-                success: true
-            })
+                success: true,
+            });
         })
         .catch((err) => res.status(500).json("Server 500"));
 });
 app.post("/account/login", (req, res, next) => {
-    let username = req.body.username;
+    let email = req.body.email;
     let password = req.body.password;
 
     AccountModel.findOne({
-            username: username,
+            email: email,
             password: password,
         })
         .then((data) => {
@@ -85,9 +105,9 @@ app.post("/account/login", (req, res, next) => {
                 res.status(200).json({
                     message: "Loggin successfully",
                     data: {
-                        username: username,
+                        email: email,
                         password: password,
-                        token: token
+                        token: token,
                     },
                     success: true,
                     status: 200,
