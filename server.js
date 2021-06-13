@@ -4,6 +4,7 @@ const port = 4000;
 var morgan = require("morgan");
 const bodyParser = require("body-parser");
 const AccountModel = require("./models/account");
+const BookModel = require("./models/databook")
 var jwt = require("jsonwebtoken");
 var cookieParser = require("cookie-parser");
 const checkToken = require("./auth/checkToken");
@@ -16,11 +17,27 @@ app.use(bodyParser.urlencoded({ extended: false }));
 
 // parse application/json
 app.use(bodyParser.json());
-
+app.get("/product", (req, res, next) => {
+    BookModel.find({})
+        .then(data => {
+            return res.status(200).json({
+                message: "BookStore",
+                success: true,
+                status: 200,
+                data: data
+            })
+        })
+        .catch(err => {
+            return res.status(401).json({
+                message: "Fail",
+                success: false,
+                status: 401
+            })
+        })
+});
 app.get("/account", checkToken, (req, res, next) => {
     AccountModel.findOne({
-            email: req.body.email,
-            password: req.body.password,
+            _id: req.user
         })
         .then((data) => {
             res.status(200).json({
@@ -69,6 +86,7 @@ app.post("/account/register", (req, res, next) => {
                     dateBirth: "",
                     sex: null,
                     introduce: "",
+                    createDate: new Date()
                 });
             }
         })

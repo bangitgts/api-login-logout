@@ -3,9 +3,6 @@ const jwt = require("jsonwebtoken")
 module.exports = function(req, res, next) {
     const token = req.header('auth-token'); // sẽ gửi yêu cầu lên header để tìm                                                   token ra rồi verify. 
     // Nếu bạn không truyền lên token thì nó sẽ gửi thông báo 
-    const username = req.header('username');
-    console.log(username);
-    console.log(token);
     if (!token) return res.status(401).send({
         status: 401,
         success: false,

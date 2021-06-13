@@ -12,7 +12,8 @@ const AccountSchema = new Schema({
     phoneNumber: String,
     dateBirth: String,
     sex: Number,
-    introduce: String
+    introduce: String,
+    createDate: String
 }, {
     collection: 'account'
 });
