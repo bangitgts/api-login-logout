@@ -4,10 +4,12 @@ const port = 4000;
 var morgan = require("morgan");
 const bodyParser = require("body-parser");
 const AccountModel = require("./models/account");
-const BookModel = require("./models/databook")
+const BookModel = require("./models/databook");
 var jwt = require("jsonwebtoken");
 var cookieParser = require("cookie-parser");
 const checkToken = require("./auth/checkToken");
+var MongoClient = require("mongodb").MongoClient;
+var url = "mongodb://127.0.0.1:27017/";
 var cors = require("cors");
 //use cors
 app.use(cors());
@@ -17,27 +19,10 @@ app.use(bodyParser.urlencoded({ extended: false }));
 
 // parse application/json
 app.use(bodyParser.json());
-app.get("/product", (req, res, next) => {
-    BookModel.find({})
-        .then(data => {
-            return res.status(200).json({
-                message: "BookStore",
-                success: true,
-                status: 200,
-                data: data
-            })
-        })
-        .catch(err => {
-            return res.status(401).json({
-                message: "Fail",
-                success: false,
-                status: 401
-            })
-        })
-});
+
 app.get("/account", checkToken, (req, res, next) => {
     AccountModel.findOne({
-            _id: req.user
+            _id: req.user,
         })
         .then((data) => {
             res.status(200).json({
@@ -86,7 +71,8 @@ app.post("/account/register", (req, res, next) => {
                     dateBirth: "",
                     sex: null,
                     introduce: "",
-                    createDate: new Date()
+                    cart: [],
+                    createDate: new Date(),
                 });
             }
         })
@@ -141,6 +127,92 @@ app.post("/account/login", (req, res, next) => {
         .catch((err) => res.status(500).json("Có lỗi sever"));
 });
 
+// product & cart
+app.get("/product", (req, res, next) => {
+    BookModel.find({})
+        .then((data) => {
+            return res.status(200).json({
+                message: "BookStore",
+                success: true,
+                status: 200,
+                data: data,
+            });
+        })
+        .catch((err) => {
+            return res.status(401).json({
+                message: "Fail",
+                success: false,
+                status: 401,
+            });
+        });
+});
+app.get("/product/cart", checkToken, (req, res, next) => {
+    AccountModel.findOne({
+            _id: req.user,
+        })
+        .then((data) => {
+            res.status(200).json({
+                status: 200,
+                success: true,
+                data: {
+                    _id: data._id,
+                    email: data.email,
+                    address: data.address,
+                    phoneNumber: data.phoneNumber,
+                    dateBirth: data.dateBirth,
+                    cart: data.cart,
+                    sex: data.sex,
+                    introduce: data.introduce
+                },
+                message: "Cart Data",
+            });
+        })
+        .catch((err) => {
+            res.status(400).json({
+                status: 400,
+                success: false,
+                message: "Cart Found",
+            });
+        });
+});
+app.put("/product/add/:_id", checkToken, (req, res, next) => {
+    const productAdd = req.params._id;
+    const amount = req.body.amount;
+    const idUserame = req.user;
+    BookModel.findOne({ _id: productAdd })
+        .then((data) => {
+            const item = {
+                _id: data._id,
+                tenSach: data.tenSach,
+                khoSach: data.khoSach,
+                theLoai: data.theLoai,
+                tacGia: data.tacGia,
+                nxb: data.nxb,
+                phathanhthang: data.phathanhthang,
+                loaisach: data.loaisach,
+                urlImage: data.urlImage,
+                giaBia: data.giaBia,
+                amount: amount,
+            };
+            console.log(item);
+            AccountModel.findOne({ _id: req.user }).then((data) => {
+                data.cart.push(item);
+                data.save();
+            });
+            res.status(200).json({
+                message: "Add successful",
+                success: true,
+                status: 200,
+            });
+        })
+        .catch((err) => {
+            res.status(500).json({
+                message: "No products found",
+                success: false,
+                status: 500,
+            });
+        });
+});
 app.listen(port, () => {
     console.log(`Example app listening at http://localhost:${port}`);
 });

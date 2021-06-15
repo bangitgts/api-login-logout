@@ -13,6 +13,7 @@ const AccountSchema = new Schema({
     dateBirth: String,
     sex: Number,
     introduce: String,
+    cart: Array,
     createDate: String
 }, {
     collection: 'account'
