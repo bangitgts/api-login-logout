@@ -146,24 +146,95 @@ app.get("/product", (req, res, next) => {
             });
         });
 });
+
+app.get("/product/loai1", (req, res, next) => {
+    BookModel.find({ loaisach: "loai1" })
+        .then((data) => {
+            return res.status(200).json({
+                message: "BookStore loai 1",
+                success: true,
+                status: 200,
+                data: data,
+            });
+        })
+        .catch((err) => {
+            return res.status(401).json({
+                message: "Fail",
+                success: false,
+                status: 401,
+            });
+        });
+});
+
+app.get("/product/loai2", (req, res, next) => {
+    BookModel.find({ loaisach: "loai2" })
+        .then((data) => {
+            return res.status(200).json({
+                message: "BookStore loai 2",
+                success: true,
+                status: 200,
+                data: data,
+            });
+        })
+        .catch((err) => {
+            return res.status(401).json({
+                message: "Fail",
+                success: false,
+                status: 401,
+            });
+        });
+});
+
+app.get("/product/loai3", (req, res, next) => {
+    BookModel.find({ loaisach: "loai3" })
+        .then((data) => {
+            return res.status(200).json({
+                message: "BookStore loai 3",
+                success: true,
+                status: 200,
+                data: data,
+            });
+        })
+        .catch((err) => {
+            return res.status(401).json({
+                message: "Fail",
+                success: false,
+                status: 401,
+            });
+        });
+});
+
+app.get("/product/loai4", (req, res, next) => {
+    BookModel.find({ loaisach: "loai4" })
+        .then((data) => {
+            return res.status(200).json({
+                message: "BookStore loai 4",
+                success: true,
+                status: 200,
+                data: data,
+            });
+        })
+        .catch((err) => {
+            return res.status(401).json({
+                message: "Fail",
+                success: false,
+                status: 401,
+            });
+        });
+});
+
+
 app.get("/product/cart", checkToken, (req, res, next) => {
     AccountModel.findOne({
-            _id: req.user,
-        })
-        .then((data) => {
+        _id: req.user,
+    })
+
+    .then((data) => {
             res.status(200).json({
                 status: 200,
                 success: true,
-                data: {
-                    _id: data._id,
-                    email: data.email,
-                    address: data.address,
-                    phoneNumber: data.phoneNumber,
-                    dateBirth: data.dateBirth,
-                    cart: data.cart,
-                    sex: data.sex,
-                    introduce: data.introduce
-                },
+                email: data.email,
+                cart: data.cart,
                 message: "Cart Data",
             });
         })
@@ -175,10 +246,10 @@ app.get("/product/cart", checkToken, (req, res, next) => {
             });
         });
 });
-app.put("/product/add/:_id", checkToken, (req, res, next) => {
+
+app.post("/product/add/:_id", checkToken, (req, res, next) => {
     const productAdd = req.params._id;
     const amount = req.body.amount;
-    const idUserame = req.user;
     BookModel.findOne({ _id: productAdd })
         .then((data) => {
             const item = {
@@ -194,12 +265,94 @@ app.put("/product/add/:_id", checkToken, (req, res, next) => {
                 giaBia: data.giaBia,
                 amount: amount,
             };
+            console.log(item);
+
             AccountModel.findOne({ _id: req.user }).then((data) => {
-                data.cart.push(item);
-                data.save();
+                // for (let book of data.cart) {
+                //     if (item._id !== book._id) {
+                //         data.cart.push(item);
+                //         data.save();
+                //     }
+                // }
+                const boolBook = data.cart.find((ele) => ele._id == productAdd);
+                if (boolBook === undefined) {
+                    data.cart.push(item);
+                    data.save();
+                } else {
+                    //  console.log(typeof data.cart);
+                    const temp = data.cart;
+                    data.cart = [];
+                    let indexBook = temp.findIndex((el) => el === boolBook);
+                    const removed = temp.splice(indexBook, 1);
+                    const totalAmount = parseInt(item.amount) + parseInt(boolBook.amount);
+                    const itemChange = {
+                        _id: item._id,
+                        tenSach: item.tenSach,
+                        khoSach: item.khoSach,
+                        theLoai: item.theLoai,
+                        tacGia: item.tacGia,
+                        nxb: item.nxb,
+                        phathanhthang: item.phathanhthang,
+                        loaisach: item.loaisach,
+                        urlImage: item.urlImage,
+                        giaBia: item.giaBia,
+                        amount: String(totalAmount),
+                    };
+                    temp.splice(indexBook, 0, itemChange);
+
+                    for (let item of temp) {
+                        data.cart.push(item);
+                    }
+                    data.save();
+                }
             });
+
             res.status(200).json({
                 message: "Add successful",
+                success: true,
+                status: 200,
+            });
+        })
+
+    .catch((err) => {
+        res.status(500).json({
+            message: "No products found",
+            success: false,
+            status: 500,
+        });
+    });
+});
+
+app.put("/product/change/:_id", checkToken, (req, res, next) => {
+    const amount = req.body.amount;
+    AccountModel.findOne({ _id: req.user })
+        .then((data) => {
+            const temp = data.cart;
+            data.cart = [];
+            let indexBook = temp.findIndex((el) => el._id == String(req.params._id));
+            const itemBook = temp.find((el) => el._id == String(req.params._id));
+            console.log(itemBook);
+            const removed = temp.splice(indexBook, 1);
+            const itemChange = {
+                _id: itemBook._id,
+                tenSach: itemBook.tenSach,
+                khoSach: itemBook.khoSach,
+                theLoai: itemBook.theLoai,
+                tacGia: itemBook.tacGia,
+                nxb: itemBook.nxb,
+                phathanhthang: itemBook.phathanhthang,
+                loaisach: itemBook.loaisach,
+                urlImage: itemBook.urlImage,
+                giaBia: itemBook.giaBia,
+                amount: amount,
+            };
+            temp.splice(indexBook, 0, itemChange);
+            for (let item of temp) {
+                data.cart.push(item);
+            }
+            data.save();
+            res.status(200).json({
+                message: "Change successfully",
                 success: true,
                 status: 200,
             });
@@ -212,6 +365,33 @@ app.put("/product/add/:_id", checkToken, (req, res, next) => {
             });
         });
 });
+
+app.delete("/product/delete/:_id", checkToken, (req, res, next) => {
+    AccountModel.findOne({ _id: req.user })
+        .then((data) => {
+            const temp = data.cart;
+            data.cart = [];
+            let indexBook = temp.findIndex((el) => el._id == req.params._id);
+            const removed = temp.splice(indexBook, 1);
+            for (let item of temp) {
+                data.cart.push(item);
+            }
+            data.save();
+            res.status(200).json({
+                message: "Delete successfully",
+                success: true,
+                status: 200,
+            });
+        })
+        .catch((err) => {
+            res.status(500).json({
+                message: "No products found",
+                success: false,
+                status: 500,
+            });
+        });
+});
+
 app.listen(port, () => {
     console.log(`Example app listening at http://localhost:${port}`);
 });
