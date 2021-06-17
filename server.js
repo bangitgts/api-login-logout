@@ -194,7 +194,6 @@ app.put("/product/add/:_id", checkToken, (req, res, next) => {
                 giaBia: data.giaBia,
                 amount: amount,
             };
-            console.log(item);
             AccountModel.findOne({ _id: req.user }).then((data) => {
                 data.cart.push(item);
                 data.save();
