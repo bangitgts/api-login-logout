@@ -8,7 +8,7 @@ const BookSchema = new Schema({
     id: String,
     tenSach: String,
     khoSach: String,
-    theloai: String,
+    theLoai: String,
     tacGia: String,
     nxb: String,
     phathanhthang: String,
