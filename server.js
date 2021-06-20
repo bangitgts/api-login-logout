@@ -223,6 +223,27 @@ app.get("/product/loai4", (req, res, next) => {
         });
 });
 
+app.get("/product/:_id", (req, res, next) => {
+    BookModel.findOne({ _id: req.params._id })
+        .then((data) => {
+            console.log(typeof data)
+            return res.status(200).json({
+                message: "Thông tin của Sách",
+                success: true,
+                status: 200,
+                data: data,
+            });
+        })
+        .catch((err) => {
+            return res.status(401).json({
+                message: "Không tìm thấy sách",
+                success: false,
+                status: 401,
+            });
+        });
+});
+
+
 
 app.get("/product/cart", checkToken, (req, res, next) => {
     AccountModel.findOne({
