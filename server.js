@@ -223,7 +223,7 @@ app.get("/product/loai4", (req, res, next) => {
         });
 });
 
-app.get("/product/:_id", (req, res, next) => {
+app.get("/product/show/:_id", (req, res, next) => {
     BookModel.findOne({ _id: req.params._id })
         .then((data) => {
             console.log(typeof data)
