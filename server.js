@@ -223,10 +223,66 @@ app.get("/product/loai4", (req, res, next) => {
         });
 });
 
+app.get("/product/loai5", (req, res, next) => {
+    BookModel.find({ loaisach: "loai5" })
+        .then((data) => {
+            return res.status(200).json({
+                message: "BookStore loai 5",
+                success: true,
+                status: 200,
+                data: data,
+            });
+        })
+        .catch((err) => {
+            return res.status(401).json({
+                message: "Fail",
+                success: false,
+                status: 401,
+            });
+        });
+});
+
+app.get("/product/loai6", (req, res, next) => {
+    BookModel.find({ loaisach: "loai6" })
+        .then((data) => {
+            return res.status(200).json({
+                message: "BookStore loai 6",
+                success: true,
+                status: 200,
+                data: data,
+            });
+        })
+        .catch((err) => {
+            return res.status(401).json({
+                message: "Fail",
+                success: false,
+                status: 401,
+            });
+        });
+});
+
+app.get("/product/loai7", (req, res, next) => {
+    BookModel.find({ loaisach: "loai7" })
+        .then((data) => {
+            return res.status(200).json({
+                message: "BookStore loai 7",
+                success: true,
+                status: 200,
+                data: data,
+            });
+        })
+        .catch((err) => {
+            return res.status(401).json({
+                message: "Fail",
+                success: false,
+                status: 401,
+            });
+        });
+});
 app.get("/product/show/:_id", (req, res, next) => {
     BookModel.findOne({ _id: req.params._id })
         .then((data) => {
-            console.log(typeof data)
+            console.log(typeof data);
             return res.status(200).json({
                 message: "Thông tin của Sách",
                 success: true,
@@ -242,8 +298,6 @@ app.get("/product/show/:_id", (req, res, next) => {
             });
         });
 });
-
-
 
 app.get("/product/cart", checkToken, (req, res, next) => {
     AccountModel.findOne({
@@ -286,7 +340,6 @@ app.post("/product/add/:_id", checkToken, (req, res, next) => {
                 giaBia: data.giaBia,
                 amount: amount,
             };
-            console.log(item);
 
             AccountModel.findOne({ _id: req.user }).then((data) => {
                 // for (let book of data.cart) {
