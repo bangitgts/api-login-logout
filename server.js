@@ -130,7 +130,7 @@ app.post("/account/login", (req, res, next) => {
 //change user
 
 //change pasword
-app.put("/account/change-password", checkToken, (req, res, next) => {
+app.put("/account/changepassword", checkToken, (req, res, next) => {
     let password = req.body.password;
     let newPassword = req.body.newPassword;
     AccountModel.findOne({
@@ -163,7 +163,7 @@ app.put("/account/change-password", checkToken, (req, res, next) => {
         });
 });
 
-app.put("/account/change-information", checkToken, (req, res, next) => {
+app.put("/account/changeinformation", checkToken, (req, res, next) => {
     let address = req.body.address;
     let phoneNumber = req.body.phoneNumber;
     let dateBirth = req.body.dateBirth;
