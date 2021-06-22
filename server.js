@@ -275,7 +275,10 @@ app.get("/product", (req, res, next) => {
                 message: "BookStore",
                 success: true,
                 status: 200,
-                data: data,
+                data: {
+                    data,
+                    amount: 0,
+                },
             });
         })
         .catch((err) => {
