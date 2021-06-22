@@ -127,6 +127,84 @@ app.post("/account/login", (req, res, next) => {
         .catch((err) => res.status(500).json("Có lỗi sever"));
 });
 
+//change user
+
+//change pasword
+app.put("/account/change-password", checkToken, (req, res, next) => {
+    let password = req.body.password;
+    let newPassword = req.body.newPassword;
+    AccountModel.findOne({
+            _id: req.user,
+            password: password,
+        })
+        .then((data) => {
+            if (data) {
+                data.password = newPassword;
+                data.save();
+                res.status(200).json({
+                    status: 200,
+                    success: true,
+                    message: "Change password successfully",
+                });
+            } else {
+                res.status(402).json({
+                    status: 402,
+                    success: false,
+                    message: "Old password entered is incorrect",
+                });
+            }
+        })
+        .catch((err) => {
+            res.status(400).json({
+                status: 400,
+                success: false,
+                message: "Đăng nhập không thành công",
+            });
+        });
+});
+
+app.put("/account/change-information", checkToken, (req, res, next) => {
+    let address = req.body.address;
+    let phoneNumber = req.body.phoneNumber;
+    let dateBirth = req.body.dateBirth;
+    let sex = req.body.sex;
+    let introduce = req.body.introduce;
+    AccountModel.findOne({
+            _id: req.user,
+        })
+        .then((data) => {
+            if (address && phoneNumber && dateBirth && sex && introduce) {
+                data.address = address;
+                data.phoneNumber = phoneNumber;
+                data.dateBirth = dateBirth;
+                data.sex = sex;
+                data.introduce = introduce;
+                data.save();
+                res.status(200).json({
+                    status: 200,
+                    success: true,
+                    message: "Change successfully",
+                });
+            } else {
+                res.status(402).json({
+                    status: 402,
+                    success: false,
+                    message: "You are not enough information",
+                });
+            }
+        })
+        .catch((err) => {
+            console.log(err);
+            res.status(400).json({
+                status: 400,
+                success: false,
+                message: "Đăng nhập không thành công",
+            });
+        });
+});
+
+// end change user
+
 // product & cart
 app.get("/product", (req, res, next) => {
     BookModel.find({})
