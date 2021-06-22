@@ -275,10 +275,7 @@ app.get("/product", (req, res, next) => {
                 message: "BookStore",
                 success: true,
                 status: 200,
-                data: {
-                    data,
-                    amount: 0,
-                },
+                data: data,
             });
         })
         .catch((err) => {
@@ -422,6 +419,7 @@ app.get("/product/loai7", (req, res, next) => {
             });
         });
 });
+
 app.get("/product/show/:_id", (req, res, next) => {
     BookModel.findOne({ _id: req.params._id })
         .then((data) => {
@@ -479,6 +477,7 @@ app.post("/product/add/:_id", checkToken, (req, res, next) => {
                 nxb: data.nxb,
                 phathanhthang: data.phathanhthang,
                 loaisach: data.loaisach,
+                isStatus: "0",
                 urlImage: data.urlImage,
                 giaBia: data.giaBia,
                 amount: amount,
@@ -511,6 +510,7 @@ app.post("/product/add/:_id", checkToken, (req, res, next) => {
                         nxb: item.nxb,
                         phathanhthang: item.phathanhthang,
                         loaisach: item.loaisach,
+                        isStatus: "0",
                         urlImage: item.urlImage,
                         giaBia: item.giaBia,
                         amount: String(totalAmount),
