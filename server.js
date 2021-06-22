@@ -134,6 +134,7 @@ app.post("/account/register", (req, res, next) => {
                     sex: null,
                     introduce: "",
                     cart: [],
+                    carted: [], // hang da thanh toan add vo day
                     createDate: new Date(),
                 });
             }
@@ -468,7 +469,8 @@ app.get("/product/cart", checkToken, (req, res, next) => {
                                 parseInt(currentValue.giaBia)
                             );
                         }, 0)
-                    ) : "0",
+                    ) :
+                    "0",
                 cart: data.cart,
                 message: "Cart Data",
             });
@@ -483,8 +485,7 @@ app.get("/product/cart", checkToken, (req, res, next) => {
         });
 });
 
-
-// change payment 
+// change payment
 app.put("/product/changepayment/:_id", checkToken, (req, res, next) => {
     AccountModel.findOne({
         _id: req.user,
@@ -533,6 +534,45 @@ app.put("/product/changepayment/:_id", checkToken, (req, res, next) => {
                 status: 400,
                 success: false,
                 message: err,
+            });
+        });
+});
+// api payment
+app.post("/product/payment/", checkToken, (req, res, next) => {
+    AccountModel.findOne({
+            _id: req.user,
+        })
+        .then((data) => {
+            const temp = data.carted;
+            console.log(temp);
+            const Paymented = data.cart.filter((el) => el.isStatus === "1");
+            const willPayment = data.cart.filter((el) => el.isStatus === "0");
+            data.cart = willPayment;
+            if (Paymented.length === 0) {
+                res.status(403).json({
+                    message: "No products to pay for",
+                    success: true,
+                    status: 403,
+                });
+            } else {
+                for (let item of Paymented) {
+                    temp.push(item);
+                }
+                data.carted = temp;
+                data.save();
+                res.status(200).json({
+                    message: "Payment successfully",
+                    success: true,
+                    status: 200,
+                });
+            }
+        })
+        .catch((err) => {
+            console.log(err);
+            res.status(400).json({
+                status: 400,
+                success: false,
+                message: "Payment Failed",
             });
         });
 });

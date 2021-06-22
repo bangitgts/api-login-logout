@@ -15,6 +15,7 @@ const AccountSchema = new Schema({
     sex: Number,
     introduce: String,
     cart: Array,
+    carted: Array,
     createDate: String,
 }, {
     collection: "account",
