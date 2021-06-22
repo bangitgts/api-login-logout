@@ -1,5 +1,7 @@
 const express = require("express");
 const app = express();
+let path = require("path");
+const multer = require("multer");
 const port = 4000;
 var morgan = require("morgan");
 const bodyParser = require("body-parser");
@@ -20,6 +22,64 @@ app.use(bodyParser.urlencoded({ extended: false }));
 // parse application/json
 app.use(bodyParser.json());
 
+// upload anh
+let diskStorage = multer.diskStorage({
+    destination: (req, file, callback) => {
+        // Định nghĩa nơi file upload sẽ được lưu lại
+        callback(null, "uploads");
+    },
+    filename: (req, file, callback) => {
+        // ở đây các bạn có thể làm bất kỳ điều gì với cái file nhé.
+        // Mình ví dụ chỉ cho phép tải lên các loại ảnh png & jpg
+        let math = ["image/png", "image/jpeg"];
+        if (math.indexOf(file.mimetype) === -1) {
+            let errorMess = `The file <strong>${file.originalname}</strong> is invalid. Only allowed to upload image jpeg or png.`;
+            return callback(errorMess, null);
+        }
+
+        // Tên của file thì mình nối thêm một cái nhãn thời gian để đảm bảo không bị trùng.
+        let filename = `${Date.now()}-bookstore-${file.originalname}`;
+        callback(null, filename);
+    },
+});
+
+// Khởi tạo middleware uploadFile với cấu hình như ở trên,
+// Bên trong hàm .single() truyền vào name của thẻ input, ở đây là "file"
+let uploadFile = multer({ storage: diskStorage }).single("file");
+app.post("/upload", checkToken, (req, res) => {
+    // Thực hiện upload file, truyền vào 2 biến req và res
+    uploadFile(req, res, (error) => {
+        // Nếu có lỗi thì trả về lỗi cho client.
+        // Ví dụ như upload một file không phải file ảnh theo như cấu hình của mình bên trên
+        if (error) {
+            return res.send(`Error when trying to upload: ${error}`);
+        }
+        AccountModel.findOne({
+                _id: req.user,
+            })
+            .then((data) => {
+                data.imagePerson = req.file.filename;
+                data.save();
+                res.status(200).json({
+                    status: 200,
+                    success: true,
+                    message: "Change avatar successfully",
+                });
+            })
+            .catch((err) => {
+                res.status(400).json({
+                    status: 400,
+                    success: false,
+                    message: "Đăng nhập không thành công",
+                });
+            });
+    });
+});
+app.get("/view/:id", (req, res) => {
+    res.sendFile(path.join(`${__dirname}/uploads/${req.params.id}`));
+});
+
+// ok
 app.get("/account", checkToken, (req, res, next) => {
     AccountModel.findOne({
             _id: req.user,
@@ -50,6 +110,7 @@ app.get("/account", checkToken, (req, res, next) => {
 });
 
 app.post("/account/register", (req, res, next) => {
+    var abc = "default.png";
     var name = req.body.name;
     var email = req.body.email;
     var password = req.body.password;
@@ -66,6 +127,7 @@ app.post("/account/register", (req, res, next) => {
                     name: name,
                     email: email,
                     password: password,
+                    imagePerson: abc,
                     address: "",
                     phoneNumber: "",
                     dateBirth: "",
@@ -167,7 +229,7 @@ app.put("/account/changeinformation", checkToken, (req, res, next) => {
     let address = req.body.address;
     let phoneNumber = req.body.phoneNumber;
     let dateBirth = req.body.dateBirth;
-    let sex = req.body.sex;
+    let sex = req.body.sex; // nu la 0, nam la 1
     let introduce = req.body.introduce;
     AccountModel.findOne({
             _id: req.user,
