@@ -446,19 +446,93 @@ app.get("/product/cart", checkToken, (req, res, next) => {
     })
 
     .then((data) => {
+            const b = data.cart.filter((el) => el.isStatus == "1");
+            console.log(b);
             res.status(200).json({
                 status: 200,
                 success: true,
                 email: data.email,
+                tongMathang: String(data.cart.length),
+                tongMathangtt: b.length > 0 ? String(b.length) : "0",
+                tongSanpham: String(
+                    data.cart.reduce(function(total, currentValue) {
+                        return total + parseInt(currentValue.amount);
+                    }, 0)
+                ),
+                tongtien: b.length > 0 ?
+                    String(
+                        b.reduce(function(total, currentValue) {
+                            return (
+                                total +
+                                parseInt(currentValue.amount) *
+                                parseInt(currentValue.giaBia)
+                            );
+                        }, 0)
+                    ) : "0",
                 cart: data.cart,
                 message: "Cart Data",
             });
         })
         .catch((err) => {
+            console.log(err);
             res.status(400).json({
                 status: 400,
                 success: false,
-                message: "Cart Found",
+                message: err,
+            });
+        });
+});
+
+
+// change payment 
+app.put("/product/changepayment/:_id", checkToken, (req, res, next) => {
+    AccountModel.findOne({
+        _id: req.user,
+    })
+
+    .then((data) => {
+            const temp = data.cart;
+            data.cart = [];
+            let indexBook = temp.findIndex((el) => el._id == String(req.params._id));
+            const itemBook = temp.find((el) => el._id == String(req.params._id));
+            const removed = temp.splice(indexBook, 1);
+            //            console.log(itemBook);
+            const itemChange = {
+                _id: itemBook._id,
+                tenSach: itemBook.tenSach,
+                khoSach: itemBook.khoSach,
+                theLoai: itemBook.theLoai,
+                tacGia: itemBook.tacGia,
+                nxb: itemBook.nxb,
+                phathanhthang: itemBook.phathanhthang,
+                loaisach: itemBook.loaisach,
+                isStatus: itemBook.isStatus == "1" ? "0" : "1",
+                urlImage: itemBook.urlImage,
+                giaBia: itemBook.giaBia,
+                amount: itemBook.amount,
+            };
+            temp.splice(indexBook, 0, itemChange);
+            for (let item of temp) {
+                data.cart.push(item);
+            }
+            data.save();
+            //temp.splice(indexBook, 0, itemChange);
+            // for (let item of temp) {
+            //     data.cart.push(item);
+            // }
+            // data.save();
+            res.status(200).json({
+                message: "Change successfully",
+                success: true,
+                status: 200,
+            });
+        })
+        .catch((err) => {
+            console.log(err);
+            res.status(400).json({
+                status: 400,
+                success: false,
+                message: err,
             });
         });
 });
@@ -559,6 +633,7 @@ app.put("/product/change/:_id", checkToken, (req, res, next) => {
                 nxb: itemBook.nxb,
                 phathanhthang: itemBook.phathanhthang,
                 loaisach: itemBook.loaisach,
+                isStatus: itemBook.isStatus,
                 urlImage: itemBook.urlImage,
                 giaBia: itemBook.giaBia,
                 amount: amount,
