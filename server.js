@@ -441,6 +441,7 @@ app.get("/product/show/:_id", (req, res, next) => {
         });
 });
 
+
 app.get("/product/cart", checkToken, (req, res, next) => {
     AccountModel.findOne({
         _id: req.user,
@@ -469,8 +470,7 @@ app.get("/product/cart", checkToken, (req, res, next) => {
                                 parseInt(currentValue.giaBia)
                             );
                         }, 0)
-                    ) :
-                    "0",
+                    ) : "0",
                 cart: data.cart,
                 message: "Cart Data",
             });
