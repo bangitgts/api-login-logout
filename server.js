@@ -46,7 +46,7 @@ let diskStorage = multer.diskStorage({
 // Khởi tạo middleware uploadFile với cấu hình như ở trên,
 // Bên trong hàm .single() truyền vào name của thẻ input, ở đây là "file"
 let uploadFile = multer({ storage: diskStorage }).single("file");
-app.post("/upload", checkToken, (req, res) => {
+app.post("/account/uploadavatar", checkToken, (req, res) => {
     // Thực hiện upload file, truyền vào 2 biến req và res
     uploadFile(req, res, (error) => {
         // Nếu có lỗi thì trả về lỗi cho client.
