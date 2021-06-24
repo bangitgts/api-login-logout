@@ -447,7 +447,6 @@ app.get("/product/show/:_id", (req, res, next) => {
         });
 });
 
-
 app.get("/product/cart", checkToken, (req, res, next) => {
     AccountModel.findOne({
         _id: req.user,
@@ -476,7 +475,8 @@ app.get("/product/cart", checkToken, (req, res, next) => {
                                 parseInt(currentValue.giaBia)
                             );
                         }, 0)
-                    ) : "0",
+                    ) :
+                    "0",
                 cart: data.cart,
                 message: "Cart Data",
             });
@@ -710,16 +710,24 @@ app.delete("/product/delete/:_id", checkToken, (req, res, next) => {
             const temp = data.cart;
             data.cart = [];
             let indexBook = temp.findIndex((el) => el._id == req.params._id);
-            const removed = temp.splice(indexBook, 1);
-            for (let item of temp) {
-                data.cart.push(item);
+            if (indexBook === -1) {
+                res.status(402).json({
+                    message: "No products found in the cart",
+                    success: true,
+                    status: 400,
+                });
+            } else {
+                const removed = temp.splice(indexBook, 1);
+                for (let item of temp) {
+                    data.cart.push(item);
+                }
+                data.save();
+                res.status(200).json({
+                    message: "Delete successfully",
+                    success: true,
+                    status: 200,
+                });
             }
-            data.save();
-            res.status(200).json({
-                message: "Delete successfully",
-                success: true,
-                status: 200,
-            });
         })
         .catch((err) => {
             res.status(500).json({
