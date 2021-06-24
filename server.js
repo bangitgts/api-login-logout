@@ -18,7 +18,6 @@ app.use(cors());
 app.use(cookieParser());
 // parse application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({ extended: false }));
-
 // parse application/json
 app.use(bodyParser.json());
 
@@ -52,7 +51,11 @@ app.post("/account/uploadavatar", checkToken, (req, res) => {
         // Nếu có lỗi thì trả về lỗi cho client.
         // Ví dụ như upload một file không phải file ảnh theo như cấu hình của mình bên trên
         if (error) {
-            return res.send(`Error when trying to upload: ${error}`);
+            return res.status(402).json({
+                status: 402,
+                success: false,
+                message: "File type must be png or jpeg",
+            });
         }
         AccountModel.findOne({
                 _id: req.user,
@@ -94,7 +97,10 @@ app.get("/account", checkToken, (req, res, next) => {
                     address: data.address,
                     phoneNumber: data.phoneNumber,
                     dateBirth: data.dateBirth,
+                    imagePerson: data.imagePerson,
                     sex: data.sex,
+                    cart: data.cart,
+                    carted: data.carted,
                     introduce: data.introduce,
                 },
                 message: "Đăng nhập thành công",
