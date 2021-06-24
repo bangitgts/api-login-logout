@@ -80,6 +80,7 @@ app.post("/account/uploadavatar", checkToken, (req, res) => {
     });
 });
 app.get("/view/:id", (req, res) => {
+
     res.sendFile(path.join(`${__dirname}/uploads/${req.params.id}`));
 });
 
@@ -93,7 +94,9 @@ app.get("/account", checkToken, (req, res, next) => {
                 status: 200,
                 success: true,
                 data: {
+
                     _id: data._id,
+                    name: data.name,
                     email: data.email,
                     address: data.address,
                     phoneNumber: data.phoneNumber,
