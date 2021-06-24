@@ -141,7 +141,7 @@ app.post("/account/register", (req, res, next) => {
                     introduce: "",
                     cart: [],
                     carted: [], // hang da thanh toan add vo day
-                    createDate: new Date(),
+                    createDate: new Date()
                 });
             }
         })
@@ -453,20 +453,24 @@ app.get("/product/cart", checkToken, (req, res, next) => {
     })
 
     .then((data) => {
-            const b = data.cart.filter((el) => el.isStatus == "1");
-            console.log(b);
+            const b = data.cart.filter((el) => el.isStatus === "1");
             res.status(200).json({
                 status: 200,
                 success: true,
                 email: data.email,
                 tongMathang: String(data.cart.length),
-                tongMathangtt: b.length > 0 ? String(b.length) : "0",
-                tongSanpham: String(
+                tongSanpham: b !== null ? String(
                     data.cart.reduce(function(total, currentValue) {
                         return total + parseInt(currentValue.amount);
                     }, 0)
-                ),
-                tongtien: b.length > 0 ?
+                ) : "0",
+                tongMathangthanhtoan: b.length > 0 ? String(b.length) : "0",
+                tongSanphamthanhtoan: b !== null ? String(
+                    b.reduce(function(total, currentValue) {
+                        return total + parseInt(currentValue.amount);
+                    }, 0)
+                ) : "0",
+                tongTienthanhtoan: b.length > 0 ?
                     String(
                         b.reduce(function(total, currentValue) {
                             return (
@@ -475,8 +479,7 @@ app.get("/product/cart", checkToken, (req, res, next) => {
                                 parseInt(currentValue.giaBia)
                             );
                         }, 0)
-                    ) :
-                    "0",
+                    ) : "0",
                 cart: data.cart,
                 message: "Cart Data",
             });
@@ -513,7 +516,7 @@ app.put("/product/changepayment/:_id", checkToken, (req, res, next) => {
                 nxb: itemBook.nxb,
                 phathanhthang: itemBook.phathanhthang,
                 loaisach: itemBook.loaisach,
-                isStatus: itemBook.isStatus == "1" ? "0" : "1",
+                isStatus: itemBook.isStatus === "1" ? "0" : "1",
                 urlImage: itemBook.urlImage,
                 giaBia: itemBook.giaBia,
                 amount: itemBook.amount,
@@ -539,7 +542,7 @@ app.put("/product/changepayment/:_id", checkToken, (req, res, next) => {
             res.status(400).json({
                 status: 400,
                 success: false,
-                message: err,
+                message: "No product found in the cart",
             });
         });
 });
@@ -550,7 +553,6 @@ app.post("/product/payment/", checkToken, (req, res, next) => {
         })
         .then((data) => {
             const temp = data.carted;
-            console.log(temp);
             const Paymented = data.cart.filter((el) => el.isStatus === "1");
             const willPayment = data.cart.filter((el) => el.isStatus === "0");
             data.cart = willPayment;
@@ -562,7 +564,22 @@ app.post("/product/payment/", checkToken, (req, res, next) => {
                 });
             } else {
                 for (let item of Paymented) {
-                    temp.push(item);
+                    let itemAdd = {
+                        _id: item._id,
+                        tenSach: item.tenSach,
+                        khoSach: item.khoSach,
+                        theLoai: item.theLoai,
+                        tacGia: item.tacGia,
+                        nxb: item.nxb,
+                        phathanhthang: item.phathanhthang,
+                        loaisach: item.loaisach,
+                        isStatus: item.isStatus,
+                        urlImage: item.urlImage,
+                        giaBia: item.giaBia,
+                        amount: item.amount,
+                        datePayment: new Date()
+                    }
+                    temp.push(itemAdd);
                 }
                 data.carted = temp;
                 data.save();
@@ -668,7 +685,6 @@ app.put("/product/change/:_id", checkToken, (req, res, next) => {
             data.cart = [];
             let indexBook = temp.findIndex((el) => el._id == String(req.params._id));
             const itemBook = temp.find((el) => el._id == String(req.params._id));
-            console.log(itemBook);
             const removed = temp.splice(indexBook, 1);
             const itemChange = {
                 _id: itemBook._id,
@@ -713,8 +729,8 @@ app.delete("/product/delete/:_id", checkToken, (req, res, next) => {
             if (indexBook === -1) {
                 res.status(402).json({
                     message: "No products found in the cart",
-                    success: true,
-                    status: 400,
+                    success: false,
+                    status: 402,
                 });
             } else {
                 const removed = temp.splice(indexBook, 1);
@@ -730,10 +746,10 @@ app.delete("/product/delete/:_id", checkToken, (req, res, next) => {
             }
         })
         .catch((err) => {
-            res.status(500).json({
-                message: "No products found",
+            res.status(402).json({
+                message: "No products found in the cart",
                 success: false,
-                status: 500,
+                status: 402,
             });
         });
 });
