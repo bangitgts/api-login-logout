@@ -10,8 +10,7 @@ const BookModel = require("./models/databook");
 var jwt = require("jsonwebtoken");
 var cookieParser = require("cookie-parser");
 const checkToken = require("./auth/checkToken");
-var MongoClient = require("mongodb").MongoClient;
-var url = "mongodb://127.0.0.1:27017/";
+
 var cors = require("cors");
 //use cors
 app.use(cors());
@@ -20,6 +19,8 @@ app.use(cookieParser());
 app.use(bodyParser.urlencoded({ extended: false }));
 // parse application/json
 app.use(bodyParser.json());
+
+
 
 // upload anh
 let diskStorage = multer.diskStorage({
@@ -141,7 +142,7 @@ app.post("/account/register", (req, res, next) => {
                     introduce: "",
                     cart: [],
                     carted: [], // hang da thanh toan add vo day
-                    createDate: new Date()
+                    createDate: new Date(),
                 });
             }
         })
@@ -233,6 +234,7 @@ app.put("/account/changepassword", checkToken, (req, res, next) => {
 });
 
 app.put("/account/changeinformation", checkToken, (req, res, next) => {
+    let name = req.body.name;
     let address = req.body.address;
     let phoneNumber = req.body.phoneNumber;
     let dateBirth = req.body.dateBirth;
@@ -243,6 +245,7 @@ app.put("/account/changeinformation", checkToken, (req, res, next) => {
         })
         .then((data) => {
             if (address && phoneNumber && dateBirth && sex && introduce) {
+                data.name = name;
                 data.address = address;
                 data.phoneNumber = phoneNumber;
                 data.dateBirth = dateBirth;
@@ -459,17 +462,19 @@ app.get("/product/cart", checkToken, (req, res, next) => {
                 success: true,
                 email: data.email,
                 tongMathang: String(data.cart.length),
-                tongSanpham: b !== null ? String(
-                    data.cart.reduce(function(total, currentValue) {
-                        return total + parseInt(currentValue.amount);
-                    }, 0)
-                ) : "0",
+                tongSanpham: b !== null ?
+                    String(
+                        data.cart.reduce(function(total, currentValue) {
+                            return total + parseInt(currentValue.amount);
+                        }, 0)
+                    ) : "0",
                 tongMathangthanhtoan: b.length > 0 ? String(b.length) : "0",
-                tongSanphamthanhtoan: b !== null ? String(
-                    b.reduce(function(total, currentValue) {
-                        return total + parseInt(currentValue.amount);
-                    }, 0)
-                ) : "0",
+                tongSanphamthanhtoan: b !== null ?
+                    String(
+                        b.reduce(function(total, currentValue) {
+                            return total + parseInt(currentValue.amount);
+                        }, 0)
+                    ) : "0",
                 tongTienthanhtoan: b.length > 0 ?
                     String(
                         b.reduce(function(total, currentValue) {
@@ -481,6 +486,7 @@ app.get("/product/cart", checkToken, (req, res, next) => {
                         }, 0)
                     ) : "0",
                 cart: data.cart,
+                carted: data.carted,
                 message: "Cart Data",
             });
         })
@@ -577,8 +583,8 @@ app.post("/product/payment/", checkToken, (req, res, next) => {
                         urlImage: item.urlImage,
                         giaBia: item.giaBia,
                         amount: item.amount,
-                        datePayment: new Date()
-                    }
+                        datePayment: new Date(),
+                    };
                     temp.push(itemAdd);
                 }
                 data.carted = temp;
@@ -753,6 +759,8 @@ app.delete("/product/delete/:_id", checkToken, (req, res, next) => {
             });
         });
 });
+
+
 
 app.listen(port, () => {
     console.log(`Example app listening at http://localhost:${port}`);
