@@ -10,7 +10,7 @@ const BookModel = require("./models/databook");
 var jwt = require("jsonwebtoken");
 var cookieParser = require("cookie-parser");
 const checkToken = require("./auth/checkToken");
-
+const mailer = require("./utils/mailer");
 var cors = require("cors");
 //use cors
 app.use(cors());
@@ -20,8 +20,15 @@ app.use(bodyParser.urlencoded({ extended: false }));
 // parse application/json
 app.use(bodyParser.json());
 
-
-
+function makeid(length) {
+    var result = "";
+    var characters = "0123456789";
+    var charactersLength = characters.length;
+    for (var i = 0; i < length; i++) {
+        result += characters.charAt(Math.floor(Math.random() * charactersLength));
+    }
+    return result;
+}
 // upload anh
 let diskStorage = multer.diskStorage({
     destination: (req, file, callback) => {
@@ -29,28 +36,20 @@ let diskStorage = multer.diskStorage({
         callback(null, "uploads");
     },
     filename: (req, file, callback) => {
-        // ở đây các bạn có thể làm bất kỳ điều gì với cái file nhé.
-        // Mình ví dụ chỉ cho phép tải lên các loại ảnh png & jpg
         let math = ["image/png", "image/jpeg"];
         if (math.indexOf(file.mimetype) === -1) {
             let errorMess = `The file <strong>${file.originalname}</strong> is invalid. Only allowed to upload image jpeg or png.`;
             return callback(errorMess, null);
         }
-
-        // Tên của file thì mình nối thêm một cái nhãn thời gian để đảm bảo không bị trùng.
         let filename = `${Date.now()}-bookstore-${file.originalname}`;
         callback(null, filename);
     },
 });
 
-// Khởi tạo middleware uploadFile với cấu hình như ở trên,
-// Bên trong hàm .single() truyền vào name của thẻ input, ở đây là "file"
 let uploadFile = multer({ storage: diskStorage }).single("file");
 app.post("/account/uploadavatar", checkToken, (req, res) => {
-    // Thực hiện upload file, truyền vào 2 biến req và res
     uploadFile(req, res, (error) => {
         // Nếu có lỗi thì trả về lỗi cho client.
-        // Ví dụ như upload một file không phải file ảnh theo như cấu hình của mình bên trên
         if (error) {
             return res.status(402).json({
                 status: 402,
@@ -80,7 +79,6 @@ app.post("/account/uploadavatar", checkToken, (req, res) => {
     });
 });
 app.get("/view/:id", (req, res) => {
-
     res.sendFile(path.join(`${__dirname}/uploads/${req.params.id}`));
 });
 
@@ -94,14 +92,13 @@ app.get("/account", checkToken, (req, res, next) => {
                 status: 200,
                 success: true,
                 data: {
-
                     _id: data._id,
                     name: data.name,
                     email: data.email,
                     address: data.address,
                     phoneNumber: data.phoneNumber,
                     dateBirth: data.dateBirth,
-                    imagePerson: data.imagePerson,
+                    imagePerson: `http://45.77.12.16:4000/view/${data.imagePerson}`,
                     sex: data.sex,
                     cart: data.cart,
                     carted: data.carted,
@@ -145,6 +142,7 @@ app.post("/account/register", (req, res, next) => {
                     introduce: "",
                     cart: [],
                     carted: [], // hang da thanh toan add vo day
+                    resetToken: null,
                     createDate: new Date(),
                 });
             }
@@ -470,14 +468,16 @@ app.get("/product/cart", checkToken, (req, res, next) => {
                         data.cart.reduce(function(total, currentValue) {
                             return total + parseInt(currentValue.amount);
                         }, 0)
-                    ) : "0",
+                    ) :
+                    "0",
                 tongMathangthanhtoan: b.length > 0 ? String(b.length) : "0",
                 tongSanphamthanhtoan: b !== null ?
                     String(
                         b.reduce(function(total, currentValue) {
                             return total + parseInt(currentValue.amount);
                         }, 0)
-                    ) : "0",
+                    ) :
+                    "0",
                 tongTienthanhtoan: b.length > 0 ?
                     String(
                         b.reduce(function(total, currentValue) {
@@ -487,7 +487,8 @@ app.get("/product/cart", checkToken, (req, res, next) => {
                                 parseInt(currentValue.giaBia)
                             );
                         }, 0)
-                    ) : "0",
+                    ) :
+                    "0",
                 cart: data.cart,
                 carted: data.carted,
                 message: "Cart Data",
@@ -763,7 +764,62 @@ app.delete("/product/delete/:_id", checkToken, (req, res, next) => {
         });
 });
 
+app.get("/account/forgotpassword", (req, res, next) => {
+    const email = req.body.email;
+    AccountModel.findOne({ email: email })
+        .then((data) => {
+            const c = makeid(6);
+            data.resetToken = c;
+            const sub = "Reset Password - Chuyên đề thực tế 2";
+            const htmlContent = `<h3>Mã xác nhận của quý khách là ${c} </h3>`;
+            mailer.sendMail(req.body.email, sub, htmlContent);
+            data.save();
+            res.status(200).json({
+                message: "Your email has been sent successfully",
+                success: true,
+                status: 200,
+            });
+        })
+        .catch((err) => {
+            res.status(402).json({
+                message: "Can't search email",
+                success: false,
+                status: 402,
+            });
+        });
+});
 
+app.put("/account/newpassword/:email", (req, res, next) => {
+    const email = req.params.email;
+    const newPassword = req.body.newPassword;
+    const token = req.body.token;
+    AccountModel.findOne({ email: email, resetToken: token })
+        .then((data) => {
+            if (data === null) {
+                res.status(402).json({
+                    message: "Token không hợp lệ",
+                    success: false,
+                    status: 402,
+                });
+            } else {
+                data.password = newPassword;
+                data.resetToken = null;
+                data.save();
+                res.status(200).json({
+                    message: "Change password successfully",
+                    success: true,
+                    status: 200,
+                });
+            }
+        })
+        .catch((err) => {
+            res.status(402).json({
+                message: "Token không hợp lệ",
+                success: false,
+                status: 402,
+            });
+        });
+});
 
 app.listen(port, () => {
     console.log(`Example app listening at http://localhost:${port}`);

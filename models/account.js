@@ -16,6 +16,7 @@ const AccountSchema = new Schema({
     introduce: String,
     cart: Array,
     carted: Array,
+    resetToken: String,
     createDate: String,
 }, {
     collection: "account",
