@@ -1,14 +1,16 @@
 const nodeMailer = require('nodemailer')
 const mailHost = 'smtp.gmail.com'
 const mailPort = 587
+var person = require('../account')
+
 const sendMail = (to, subject, htmlContent) => {
     const transporter = nodeMailer.createTransport({
         host: mailHost,
         port: mailPort,
         secure: false, // nếu các bạn dùng port 465 (smtps) thì để true, còn lại hãy để false cho tất cả các port khác
         auth: {
-            user: "bangitgts@gmail.com",
-            pass: "raundmswmjmoeros"
+            user: person.email,
+            pass: person.password
         }
     })
 
