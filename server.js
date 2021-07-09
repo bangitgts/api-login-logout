@@ -1,15 +1,10 @@
 const express = require("express");
 const app = express();
 let path = require("path");
-const multer = require("multer");
 const port = 4000;
 var morgan = require("morgan");
 const bodyParser = require("body-parser");
-const AccountModel = require("./models/account");
-const BookModel = require("./models/databook");
-
 const cookieParser = require("cookie-parser");
-const checkToken = require("./auth/checkToken");
 const route = require("./routes/index.js");
 const cors = require("cors");
 //use cors
