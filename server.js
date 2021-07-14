@@ -22,6 +22,9 @@ app.get("/view/:id", (req, res) => {
     res.sendFile(path.join(`${__dirname}/uploads/${req.params.id}`));
 });
 
+app.get("/", (req, res) => {
+    res.json("API for Book Store")
+});
 app.listen(port, () => {
     console.log(`Example app listening at http://localhost:${port}`);
 });

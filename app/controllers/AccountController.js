@@ -49,6 +49,7 @@ class AccountController {
                             sex: data.sex,
                             cart: data.cart,
                             carted: data.carted,
+                            isVerify: data.isVerify,
                             introduce: data.introduce,
                         },
                         message: "Login successfully",
@@ -89,6 +90,7 @@ class AccountController {
                             introduce: "",
                             cart: [],
                             carted: [], // hang da thanh toan add vo day
+                            isVerify: 0,
                             resetToken: null,
                             createDate: new Date(),
                         });
@@ -279,34 +281,97 @@ class AccountController {
         }
         // [POST] Upload avatar
     uploadImage(req, res) {
-        uploadFile(req, res, (error) => {
-            // Nếu có lỗi thì trả về lỗi cho client.
-            if (error) {
-                return res.status(402).json({
-                    status: 402,
-                    success: false,
-                    message: "File type must be png or jpeg",
-                });
-            }
-            AccountModel.findOne({
-                    _id: req.user,
-                })
-                .then((data) => {
-                    data.imagePerson = req.file.filename;
-                    data.save();
-                    res.status(200).json({
-                        status: 200,
-                        success: true,
-                        message: "Change avatar successfully",
+            uploadFile(req, res, (error) => {
+                // Nếu có lỗi thì trả về lỗi cho client.
+                if (error) {
+                    return res.status(402).json({
+                        status: 402,
+                        success: false,
+                        message: "File type must be png or jpeg",
                     });
+                }
+                AccountModel.findOne({
+                        _id: req.user,
+                    })
+                    .then((data) => {
+                        data.imagePerson = req.file.filename;
+                        data.save();
+                        res.status(200).json({
+                            status: 200,
+                            success: true,
+                            message: "Change avatar successfully",
+                        });
+                    })
+                    .catch((err) => {
+                        res.status(400).json({
+                            status: 400,
+                            success: false,
+                            message: "Login Failed",
+                        });
+                    });
+            });
+        }
+        // [POST] Send Mail Verify Email
+    sendMailVerifyEmail(req, res) {
+            const _id = req.user._id;
+            AccountModel.findOne({ _id: _id })
+                .then((data) => {
+                    if (data.isVerify !== 1) {
+                        const generateId = makeid(6);
+                        data.isVerify = generateId;
+                        const sub = "Verify Account - Book Store";
+                        const htmlContent = `<h3>Your verification code ${generateId} </h3>`;
+                        mailer.sendMail(data.email, sub, htmlContent);
+                        data.save();
+                        res.status(200).json({
+                            message: "Your email has been sent successfully",
+                            success: true,
+                            status: 200,
+                        });
+                    } else {
+                        res.status(405).json({
+                            message: "Account has been verifyeded",
+                            success: false,
+                            status: 405,
+                        });
+                    }
                 })
                 .catch((err) => {
-                    res.status(400).json({
-                        status: 400,
+                    res.status(500).json({
+                        message: "Your email has been sent failed because server error",
                         success: false,
-                        message: "Login Failed",
+                        status: 500,
                     });
                 });
+        }
+        // [PUT] Verify Email
+    verifyAccount(req, res) {
+        const _id = req.user._id;
+        const verification = req.body.verification;
+        AccountModel.findOne({ _id: _id }).then((data) => {
+            if (data.isVerify === 1) {
+                res.status(405).json({
+                    message: "Account has been verifyeded",
+                    success: false,
+                    status: 405,
+                });
+            } else {
+                if (data.isVerify == verification) {
+                    data.isVerify = 1;
+                    data.save();
+                    res.status(202).json({
+                        message: "Congratulations!!! The account has been verified",
+                        success: true,
+                        status: 202,
+                    });
+                } else {
+                    res.status(405).json({
+                        message: "Verification code does not match",
+                        success: false,
+                        status: 405,
+                    });
+                }
+            }
         });
     }
 }

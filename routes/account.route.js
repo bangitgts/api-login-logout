@@ -17,5 +17,9 @@ router.post("/forgotpassword", accountController.forgotPassword);
 // [PUT] New Password after forgotPassword
 router.put("/newpassword/:email", accountController.newPassword);
 // [POST] Upload Avatar
-router.post("/uploadavatar", checkToken, accountController.uploadImage)
+router.post("/uploadavatar", checkToken, accountController.uploadImage);
+// [POST] Send Email Verify Account Email
+router.post("/sendemailverifyaccount", checkToken, accountController.sendMailVerifyEmail);
+// [PUT] Change isVerify Account Email
+router.put("/verifyaccount", checkToken, accountController.verifyAccount);
 module.exports = router;

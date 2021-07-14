@@ -1,8 +1,7 @@
 const nodeMailer = require('nodemailer')
 const mailHost = 'smtp.gmail.com'
 const mailPort = 587
-var person = require('../account')
-
+var person = require('../account/email.js')
 const sendMail = (to, subject, htmlContent) => {
     const transporter = nodeMailer.createTransport({
         host: mailHost,
