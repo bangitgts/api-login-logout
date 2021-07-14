@@ -2,6 +2,7 @@ const AccountModel = require("../../models/account");
 const jwt = require("jsonwebtoken");
 const mailer = require("../../utils/mailer");
 const multer = require("multer");
+const md5 = require('md5');
 let diskStorage = multer.diskStorage({
     destination: (req, file, callback) => {
         // Định nghĩa nơi file upload sẽ được lưu lại
@@ -81,7 +82,7 @@ class AccountController {
                         AccountModel.create({
                             name: name,
                             email: email,
-                            password: password,
+                            password: md5(password),
                             imagePerson: abc,
                             address: "",
                             phoneNumber: "",
@@ -113,10 +114,10 @@ class AccountController {
     loginAccount(req, res) {
             let email = req.body.email;
             let password = req.body.password;
-
+            let md5Password = md5(password);
             AccountModel.findOne({
                     email: email,
-                    password: password,
+                    password: md5Password,
                 })
                 .then((data) => {
                     if (data) {
@@ -131,7 +132,7 @@ class AccountController {
                             message: "Loggin successfully",
                             data: {
                                 email: email,
-                                password: password,
+                                password: md5(password),
                                 token: token,
                             },
                             success: true,
@@ -151,13 +152,14 @@ class AccountController {
     changePassword(req, res) {
             let password = req.body.password;
             let newPassword = req.body.newPassword;
+            let md5newPassword = md5(newPassword);
             AccountModel.findOne({
                     _id: req.user,
-                    password: password,
+                    password: md5(password),
                 })
                 .then((data) => {
                     if (data) {
-                        data.password = newPassword;
+                        data.password = md5newPassword;
                         data.save();
                         res.status(200).json({
                             status: 200,
@@ -251,6 +253,7 @@ class AccountController {
     newPassword(req, res) {
             const email = req.params.email;
             const newPassword = req.body.newPassword;
+            const md5newPassword = md5(newPassword);
             const token = req.body.token;
             AccountModel.findOne({ email: email, resetToken: token })
                 .then((data) => {
@@ -261,7 +264,7 @@ class AccountController {
                             status: 402,
                         });
                     } else {
-                        data.password = newPassword;
+                        data.password = md5newPassword;
                         data.resetToken = null;
                         data.save();
                         res.status(200).json({
@@ -351,7 +354,7 @@ class AccountController {
         AccountModel.findOne({ _id: _id }).then((data) => {
             if (data.isVerify === 1) {
                 res.status(405).json({
-                    message: "Account has been verifyeded",
+                    message: "Account has been verifyded",
                     success: false,
                     status: 405,
                 });
