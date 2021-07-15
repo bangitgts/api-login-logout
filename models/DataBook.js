@@ -1,7 +1,7 @@
-const mongoose = require('mongoose');
-mongoose.connect('mongodb://localhost/CDTT', {
+const mongoose = require("mongoose");
+mongoose.connect("mongodb://localhost/CDTT", {
     useNewUrlParser: true,
-    useUnifiedTopology: true
+    useUnifiedTopology: true,
 });
 const Schema = mongoose.Schema;
 const BookSchema = new Schema({
@@ -15,9 +15,9 @@ const BookSchema = new Schema({
     loaisach: String,
     urlImage: String,
     giaBia: String,
-    moTa: String
+    moTa: String,
 }, {
-    collection: 'bookstore'
+    collection: "bookstore",
 });
-const BookModel = mongoose.model('bookstore', BookSchema);
+const BookModel = mongoose.model("bookstore", BookSchema);
 module.exports = BookModel;

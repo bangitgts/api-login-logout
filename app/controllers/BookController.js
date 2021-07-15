@@ -33,7 +33,7 @@ class BookController {
                 })
                 .catch((err) => {
                     return res.status(401).json({
-                        message: "Fail",
+                        message: "Failed",
                         success: false,
                         status: 401,
                     });
@@ -192,14 +192,16 @@ class BookController {
                                 data.cart.reduce(function(total, currentValue) {
                                     return total + parseInt(currentValue.amount);
                                 }, 0)
-                            ) : "0",
+                            ) :
+                            "0",
                         tongMathangthanhtoan: b.length > 0 ? String(b.length) : "0",
                         tongSanphamthanhtoan: b !== null ?
                             String(
                                 b.reduce(function(total, currentValue) {
                                     return total + parseInt(currentValue.amount);
                                 }, 0)
-                            ) : "0",
+                            ) :
+                            "0",
                         tongTienthanhtoan: b.length > 0 ?
                             String(
                                 b.reduce(function(total, currentValue) {
@@ -209,7 +211,8 @@ class BookController {
                                         parseInt(currentValue.giaBia)
                                     );
                                 }, 0)
-                            ) : "0",
+                            ) :
+                            "0",
                         cart: data.cart,
                         carted: data.carted,
                         message: "Cart Data",
@@ -258,11 +261,6 @@ class BookController {
                         data.cart.push(item);
                     }
                     data.save();
-                    //temp.splice(indexBook, 0, itemChange);
-                    // for (let item of temp) {
-                    //     data.cart.push(item);
-                    // }
-                    // data.save();
                     res.status(200).json({
                         message: "Change successfully",
                         success: true,
@@ -353,12 +351,6 @@ class BookController {
                     };
 
                     AccountModel.findOne({ _id: req.user }).then((data) => {
-                        // for (let book of data.cart) {
-                        //     if (item._id !== book._id) {
-                        //         data.cart.push(item);
-                        //         data.save();
-                        //     }
-                        // }
                         const boolBook = data.cart.find((ele) => ele._id == productAdd);
                         if (boolBook === undefined) {
                             data.cart.push(item);
@@ -395,7 +387,7 @@ class BookController {
                     });
 
                     res.status(200).json({
-                        message: "Add successful",
+                        message: "Add successfuly",
                         success: true,
                         status: 200,
                     });

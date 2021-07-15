@@ -2,7 +2,7 @@ const AccountModel = require("../../models/account");
 const jwt = require("jsonwebtoken");
 const mailer = require("../../utils/mailer");
 const multer = require("multer");
-const md5 = require('md5');
+const md5 = require("md5");
 let diskStorage = multer.diskStorage({
     destination: (req, file, callback) => {
         // Định nghĩa nơi file upload sẽ được lưu lại
@@ -127,7 +127,6 @@ class AccountController {
                             "password"
                         );
                         res.header("auth-token", token);
-
                         res.status(200).json({
                             message: "Loggin successfully",
                             data: {
