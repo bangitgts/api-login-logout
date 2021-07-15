@@ -3,6 +3,7 @@ const express = require("express");
 const router = express.Router();
 const bookController = require("../app/controllers/BookController");
 const checkToken = require("../auth/checkToken");
+
 // [ROUTER](https://)
 router.get("/", bookController.getBook);
 router.get("/loai1", bookController.getLoai1);

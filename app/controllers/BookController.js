@@ -286,10 +286,16 @@ class BookController {
                     const Paymented = data.cart.filter((el) => el.isStatus === "1");
                     const willPayment = data.cart.filter((el) => el.isStatus === "0");
                     data.cart = willPayment;
-                    if (Paymented.length === 0) {
+                    if (data.address.length === 0) {
+                        res.status(406).json({
+                            message: "You have not updated the address. Please update to pay",
+                            success: false,
+                            status: 406,
+                        });
+                    } else if (Paymented.length === 0) {
                         res.status(403).json({
                             message: "No products to pay for",
-                            success: true,
+                            success: false,
                             status: 403,
                         });
                     } else {
