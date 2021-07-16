@@ -5,17 +5,22 @@ mongoose.connect("mongodb://localhost/CDTT", {
 });
 const Schema = mongoose.Schema;
 const BookSchema = new Schema({
-    id: String,
     tenSach: String,
+    tacGia: String,
+    phathanhthang: String,
+    nxb: String,
     khoSach: String,
     theLoai: String,
-    tacGia: String,
-    nxb: String,
-    phathanhthang: String,
     loaisach: String,
     urlImage: String,
     giaBia: String,
+    giaGiam: Number,
     moTa: String,
+    like: Array,
+    comment: Array,
+    voucher: Array,
+    soLuongtrongkho: Number,
+    soLuongdaban: Array,
 }, {
     collection: "bookstore",
 });
