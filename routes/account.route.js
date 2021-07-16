@@ -11,7 +11,11 @@ router.post("/login", accountController.loginAccount);
 // [PUT] Change Password
 router.put("/changepassword", checkToken, accountController.changePassword);
 // [PUT] Change Information
-router.put("/changeinformation", checkToken, accountController.changeInformation);
+router.put(
+    "/changeinformation",
+    checkToken,
+    accountController.changeInformation
+);
 // [POST] Forgot Password
 router.post("/forgotpassword", accountController.forgotPassword);
 // [PUT] New Password after forgotPassword
@@ -19,7 +23,16 @@ router.put("/newpassword/:email", accountController.newPassword);
 // [POST] Upload Avatar
 router.post("/uploadavatar", checkToken, accountController.uploadImage);
 // [POST] Send Email Verify Account Email
-router.post("/sendemailverifyaccount", checkToken, accountController.sendMailVerifyEmail);
+router.post(
+    "/sendemailverifyaccount",
+    checkToken,
+    accountController.sendMailVerifyEmail
+);
 // [PUT] Change isVerify Account Email
 router.put("/verifyaccount", checkToken, accountController.verifyAccount);
+// [POST] Like book
+router.post("/likebook", checkToken, accountController.likeBook);
+// [POST] Disliked
+router.post("/dislikebook", checkToken, accountController.dislikeBook);
+
 module.exports = router;

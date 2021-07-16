@@ -1,4 +1,6 @@
 const AccountModel = require("../../models/account");
+const BookModel = require("../../models/databook");
+
 const jwt = require("jsonwebtoken");
 const mailer = require("../../utils/mailer");
 const multer = require("multer");
@@ -91,9 +93,11 @@ class AccountController {
                             introduce: "",
                             cart: [],
                             carted: [], // hang da thanh toan add vo day
+                            liked: [],
+                            comment: [],
                             isVerify: 0,
                             resetToken: null,
-                            createDate: new Date(),
+                            createDate: new Date().toLocaleDateString(),
                         });
                     }
                 })
@@ -358,7 +362,7 @@ class AccountController {
                     status: 405,
                 });
             } else {
-                if (data.isVerify == verification) {
+                if (data.isVerify === verification) {
                     data.isVerify = 1;
                     data.save();
                     res.status(202).json({
@@ -373,6 +377,74 @@ class AccountController {
                         status: 405,
                     });
                 }
+            }
+        });
+    }
+    likeBook(req, res) {
+        const idBook = req.body.idBook;
+        const idUser = req.user._id;
+        BookModel.findOne({ _id: idBook }).then((data) => {
+            const boolLike = data.like.find((el) => el._id == idUser);
+            if (boolLike !== undefined) {
+                res.status(405).json({
+                    message: "This person liked the book",
+                    success: false,
+                    status: 405,
+                });
+            } else {
+                AccountModel.findOne({ _id: idUser }).then((account) => {
+                    const itemAccount = {
+                        _id: account._id,
+                        email: account.email,
+                    };
+                    data.like.push(itemAccount);
+                    const itemBook = {
+                        _id: data._id,
+                        tenSach: data.tenSach,
+                    };
+                    account.liked.push(itemBook);
+                    data.save();
+                    account.save();
+                });
+                res.status(200).json({
+                    message: "Successfully like book",
+                    success: true,
+                    status: 200,
+                });
+            }
+        });
+    }
+    dislikeBook(req, res) {
+        function removeItemOnce(arr, value) {
+            var index = arr.indexOf(value);
+            if (index > -1) {
+                arr.splice(index, 1);
+            }
+            return arr;
+        }
+        const idBook = req.body.idBook;
+        const idUser = req.user._id;
+        BookModel.findOne({ _id: idBook }).then((data) => {
+            const boolLike = data.like.find((el) => el._id == idUser);
+            if (boolLike === undefined) {
+                res.status(405).json({
+                    message: "This person didn't like the book",
+                    success: false,
+                    status: 405,
+                });
+            } else {
+                AccountModel.findOne({ _id: idUser }).then((account) => {
+                    const boolAccount = account.liked.find((el) => el._id == idBook);
+                    removeItemOnce(data.like, boolLike);
+                    removeItemOnce(account.liked, boolAccount);
+                    data.save();
+                    account.save();
+                });
+                res.status(200).json({
+                    message: "This person disliked the book",
+                    success: true,
+                    status: 200,
+                });
             }
         });
     }

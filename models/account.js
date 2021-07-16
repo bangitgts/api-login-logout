@@ -16,6 +16,8 @@ const AccountSchema = new Schema({
     introduce: String,
     cart: Array,
     carted: Array,
+    liked: Array,
+    comment: Array, // comment obtains object
     isVerify: Number,
     resetToken: String,
     createDate: String,
