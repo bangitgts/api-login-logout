@@ -34,5 +34,8 @@ router.put("/verifyaccount", checkToken, accountController.verifyAccount);
 router.post("/likebook", checkToken, accountController.likeBook);
 // [POST] Disliked
 router.post("/dislikebook", checkToken, accountController.dislikeBook);
+// [POST] Comment
+router.post("/comentbook", checkToken, accountController.dislikeBook);
 
+// [POST] Comments
 module.exports = router;
